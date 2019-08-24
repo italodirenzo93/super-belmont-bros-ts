@@ -6,12 +6,17 @@ import { Color } from "./components/Color";
 import { SpriteRenderingSystem } from "./systems/SpriteRenderingSystem";
 import { Sprite } from "./components/Sprite";
 import { loadImage } from "./utils";
+import { Tilemap } from "./components/Tilemap";
+import { TilemapRenderingSystem } from "./systems/TilemapRenderingSystem";
+import { canvasConfig } from './config';
+
 import sheetSimon from '../assets/images/sheet-simon.png';
+import oneOne from '../assets/maps/1-1.json';
 
 // Create canvas
 const canvas = document.createElement('canvas') as HTMLCanvasElement;
-canvas.width = 640;
-canvas.height = 480;
+canvas.width = canvasConfig.width;
+canvas.height = canvasConfig.height;
 
 // Create rendering context
 const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -31,19 +36,19 @@ async function loadContent() {
         new Color('red')
     );
 
-    try {
-        const sheet = await loadImage(sheetSimon);
-        const simon = world.createEntity();
-        world.addEntityComponents(
-            simon,
-            new Transform(100, 100),
-            new Sprite(sheet)
-        );
-    } catch (err) {
-        console.error(err);
-    }
+    const sheet = await loadImage(sheetSimon);
+    const simon = world.createEntity();
+    world.addEntityComponents(
+        simon,
+        new Transform(100, 100),
+        new Sprite(sheet)
+    );
+
+    const level = world.createEntity();
+    world.addEntityComponents(level, new Tilemap(oneOne));
 
     // Create systems
+    world.addSystem(new TilemapRenderingSystem(ctx, canvasConfig));
     world.addSystem(new TextRenderingSystem(ctx));
     world.addSystem(new SpriteRenderingSystem(ctx));
 }
